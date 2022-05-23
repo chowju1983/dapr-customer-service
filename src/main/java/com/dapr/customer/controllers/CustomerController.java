@@ -26,6 +26,11 @@ public class CustomerController {
 		return customerService.getOrderDetails(orderId);
 	}
 	
+	@PostMapping("/customer/verify/middleware")
+	public Object verifyMiddlewareExecution(@RequestBody String requestBody) {
+		return customerService.verifyMiddlewareExecution(requestBody);
+	}
+	
 	@PostMapping(value = "/customer/pubSub/order")
 	public Object postPubSubOrder(@RequestBody Order order) throws Exception{
 		customerService.submitPubSubOrder(order);

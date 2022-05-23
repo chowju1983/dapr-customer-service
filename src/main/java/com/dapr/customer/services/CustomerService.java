@@ -2,6 +2,7 @@ package com.dapr.customer.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,14 +14,18 @@ import com.dapr.customer.models.Order;
 import com.dapr.customer.models.State;
 
 @Service
-public class CustomerService {
-
-	private static final String DAPR_PORT = "3500";
-	private static final String DAPR_HOST="http://localhost:";
+public class CustomerService {	
+	
 	private static final String PUBSUB_NAME = "orderpubsub";
 	private static final String TOPIC = "orders";
 	private static final String BINDING_NAME= "checkout";
 	private static final String STATE_STORE="statestore";
+	
+	@Value("${DAPR_HOST}")
+	private String DAPR_HOST;
+	
+	@Value("${DAPR_HTTP_PORT}")
+	private String DAPR_PORT;
 	
 	
 	private Logger LOGGER = LoggerFactory.getLogger(CustomerService.class);
@@ -81,6 +86,16 @@ public class CustomerService {
 		ResponseEntity<String> ret = restTemplate.exchange(STATE_STORE_URI, HttpMethod.GET, null, String.class);
 		LOGGER.info("State Store Key Retrieved: " + ret.getBody());
 		return ret.getBody();
+	}
+
+	public Object verifyMiddlewareExecution(String body) {		
+		var restTemplate = new RestTemplate();
+		String url = DAPR_HOST + DAPR_PORT + "/order/middleware" ;	
+		var headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");		
+		headers.set("dapr-app-id", "order-service");
+		return restTemplate.exchange(url, HttpMethod.POST,
+				new HttpEntity<>(body, headers), String.class);
 	}
 	
 }
